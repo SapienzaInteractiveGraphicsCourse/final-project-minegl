@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WebGLcraft</title>
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+#version 300 es
+
+in  vec4 vPosition;
+in  vec2 vTexCoord;
+in float vs_shading;
+out float fs_shading;
+out vec2 fTexCoord;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+
+in mat4 matrix;
+
+void main()
+{
+	fs_shading = vs_shading;
+
+	fTexCoord = vTexCoord;
+	switch (gl_VertexID) {
+	case 1:
+	    fTexCoord.y += 0.0625;
+	    break;
+	case 2:
+		fTexCoord.x += 0.0625;
+		fTexCoord.y += 0.0625;
+		break;
+	case 3:
+		fTexCoord.x += 0.0625;
+		break;
+	}
+
+	//gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+	gl_Position = projectionMatrix * matrix * vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+#version 300 es
+
+precision mediump float;
+
+in  vec2 fTexCoord;
+in float fs_shading;
+out vec4 fragColor;
+uniform sampler2D Tex0;
+
+void main()
+{
+	fragColor = texture(Tex0, fTexCoord)*fs_shading;
+	fragColor.w = 1.0;
+}
+</script>
+
+<script type="text/javascript" src="./lib/InitShaders.js"></script>
+<script type="text/javascript" src="./lib/MVnew.js"></script>
+<script type="text/javascript" src="./lib/simplexNoise.js"></script>
+<script type="text/javascript" src="main.js"></script>
+
+<body>
+<canvas id="gl-canvas" width="600" height="600">
+Oops ... your browser doesn't support the HTML5 canvas element
+</canvas>
+<br>
+
+</body>
+</html>
