@@ -38,19 +38,27 @@ for (var i = 0; i < 4; i++) {
 var last_time = -1;
 
 // Varie
-var textures = [];
-var vBuffer;
+//var textures = [];
 
 function scale4(a, b, c) {
-   var result = mat4();
-   result[0][0] = a;
-   result[1][1] = b;
-   result[2][2] = c;
-   return result;
+	var result = mat4();
+	result[0][0] = a;
+	result[1][1] = b;
+	result[2][2] = c;
+	return result;
 }
 
 
 // texture
+
+var textures = {
+	"grass": vec2(1/256,15/16-(1/256)),
+	"dirty grass": vec2(2/16+5/256,15/16-1/256),
+	"snow": vec2(4/16+9/256,15/16-1/256),
+	"dirty snow": vec2(5/16+11/256,15/16-1/256),
+	"dirt": vec2(1/16+(3/256),15/16-(1/256)),
+	"water": vec2(6/16+13/256,15/16-1/256)
+};
 
 /*
 verde
@@ -197,94 +205,6 @@ for ( var i = 0; i < 14; i++ ) {
 	}
 }
 
-
-//		if (i<16) {
-//			if (j<16) {
-//				// erba
-//				image_texture[4*i*texSize+4*j] = 82 + red_variation;
-//				image_texture[4*i*texSize+4*j+1] = 137 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			} else if (j<32) {
-//				// terra
-//				image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//				image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			} else if (j<48) {
-//				// erba e terra
-//				if (i<4) {
-//					image_texture[4*i*texSize+4*j] = 82 + red_variation;
-//					image_texture[4*i*texSize+4*j+1] = 137 + green_variation;
-//					image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//					image_texture[4*i*texSize+4*j+3] = 255;
-//				} else {
-//					image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//					image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//					image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//					image_texture[4*i*texSize+4*j+3] = 255;
-//				}
-//			}  else if (j<64) {
-//				// pietra
-//				image_texture[4*i*texSize+4*j] = 156 + red_variation;
-//				image_texture[4*i*texSize+4*j+1] = 156 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = 156 + blue_variation;
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			}  else if (j<80) {
-//				// neve
-//				image_texture[4*i*texSize+4*j] = 219 + red_variation;
-//				image_texture[4*i*texSize+4*j+1] = 224 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = 230 + blue_variation;
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			}  else if (j<96) {
-//				// neve e terra
-//				if (i<4) {
-//					image_texture[4*i*texSize+4*j] = 219 + red_variation;
-//					image_texture[4*i*texSize+4*j+1] = 224 + green_variation;
-//					image_texture[4*i*texSize+4*j+2] = 230 + blue_variation;
-//					image_texture[4*i*texSize+4*j+3] = 255;
-//				} else {
-//					image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//					image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//					image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//					image_texture[4*i*texSize+4*j+3] = 255;
-//				}
-//			}  else if (j<112) {
-//				// acqua
-//				image_texture[4*i*texSize+4*j] = 0 + Math.abs(red_variation);
-//				image_texture[4*i*texSize+4*j+1] = 18 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = 179 + blue_variation;
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			} else {
-//				/*
-//				image_texture[4*i*texSize+4*j] = 255;
-//				image_texture[4*i*texSize+4*j+1] = 0;
-//				image_texture[4*i*texSize+4*j+2] = 255;
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//				*/
-//				image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//				image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//				image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//				image_texture[4*i*texSize+4*j+3] = 255;
-//			}
-//		} else if (i<50) {
-//			image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//			image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//			image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//			image_texture[4*i*texSize+4*j+3] = 255;
-//		} else {
-//			/*
-//			image_texture[4*i*texSize+4*j] = 255;
-//			image_texture[4*i*texSize+4*j+1] = 0;
-//			image_texture[4*i*texSize+4*j+2] = 255;
-//			image_texture[4*i*texSize+4*j+3] = 255;*/
-//			image_texture[4*i*texSize+4*j] = 118 + red_variation;
-//			image_texture[4*i*texSize+4*j+1] = 83 + green_variation;
-//			image_texture[4*i*texSize+4*j+2] = Math.abs(blue_variation);
-//			image_texture[4*i*texSize+4*j+3] = 255;
-//		}
-
-
 var texture1;
 /*
 function configureTexture() {
@@ -324,62 +244,97 @@ function global_coords_to_local_coords(x, z) {
 	return {x: local_x, z: local_z, id: chunk_ID}
 }
 
+//creature_center_y = {human: 1.8, horse: 0, spider: 0};
+
+function physics_engine(starting_vector, displacement_vector, creature_id) {
+	var local_starting_object = global_coords_to_local_coords(starting_vector[0], starting_vector[2]);
+	if (!local_starting_object) return displacement_vector;
+	var current_chunk = chunks[local_starting_object.id];
+	var y_value_block_ahead;
+	if (displacement_vector[0]>0) {
+
+		if (local_starting_object.x==chunk_size-1) {
+			// TODO
+		} else {
+			y_value_block_ahead = current_chunk.map[local_camera_pos.x+1][local_camera_pos.z];
+		}
+
+		if ((y_value_block_ahead + 1.8) > displacement_vector[1]) {
+			if ( Math.floor(starting_vector[0]) + (11/16) < starting_vector[0] + displacement_vector[0] ) {
+				displacement_vector[0] = Math.floor(starting_vector[0]) + (11/16) - starting_vector[0];
+			}
+		}
+	} else if (displacement_vector[0]<0) {
+
+	}
+}
+
 function onTimer() {
 	//console.log(Date.now()-last_time); last_time = Date.now();
 
 	let tmp_sin = Math.sin(camera_alfa);
 	let tmp_cos = Math.cos(camera_alfa);
+    var rotation_matrix = mat3(
+		tmp_sin,	0,	tmp_cos,
+        0,			1,		0,
+        tmp_cos,	0,	-tmp_sin
+    );
+	var displacement = vec3(0,0,0);
+	let number_of_axis_displacements = 0;
+
 	let tmp_x = 0.0;
 	let tmp_y = 0.0;
 	let tmp_z = 0.0;
-	let tmp_movs = 0;
 	let tmp;
-
+	//--------------
 	if (key_pressed[0] && !key_pressed[2]) {
-		tmp_z = 1.0;
-		tmp_movs++;
+		displacement[0] = 1.0;
+		number_of_axis_displacements++;
 	} else if (key_pressed[2] && !key_pressed[0]) {
-		tmp_z = -1.0;
-		tmp_movs++;
+		displacement[0] = -1.0;
+		number_of_axis_displacements++;
 	}
 
 	if (key_pressed[1] && !key_pressed[3]) {
-		tmp_x = 1.0;
-		tmp_movs++;
+		displacement[2] = 1.0;
+		number_of_axis_displacements++;
 	} else if (key_pressed[3] && !key_pressed[1]) {
-		tmp_x = -1.0;
-		tmp_movs++;
+		displacement[2] = -1.0;
+		number_of_axis_displacements++;
 	}
 
 	if (key_pressed[4] && !key_pressed[5]) {
-		tmp_y = -1.0;
-		tmp_movs++;
+		displacement[1] = -1.0;
+		number_of_axis_displacements++;
 	} else if (key_pressed[5] && !key_pressed[4]) {
-		tmp_y = 1.0;
-		tmp_movs++;
+		displacement[1] = 1.0;
+		number_of_axis_displacements++;
 	}
 
-	if (tmp_movs==0) return;
-	else if (tmp_movs==2) {
+	if (number_of_axis_displacements==0) return;
+	else if (number_of_axis_displacements==2) {
 		//0.70710678118 is equal to 1/(2^0.5)
-		tmp_x *= 0.70710678118;
-		tmp_y *= 0.70710678118;
-		tmp_z *= 0.70710678118;
-	} else if (tmp_movs==3) {
+		displacement = mult(0.70710678118, displacement);
+	} else if (number_of_axis_displacements==3) {
 		//0.57735026919 is equal to 1/(3^0.5)
-		tmp_x *= 0.57735026919;
-		tmp_y *= 0.57735026919;
-		tmp_z *= 0.57735026919;
+		displacement = mult(0.57735026919, displacement);
 	}
+
+	//displacement = mult(0.035, displacement); //slow down
 
 	/*
-	tmp_x *= 0.035;
-	tmp_y *= 0.035;
-	tmp_z *= 0.035;*/
-
-	tmp = (tmp_z*tmp_cos)-(tmp_x*tmp_sin);
-	tmp_z = (tmp_z*tmp_sin)+(tmp_x*tmp_cos);
+	tmp = (displacement[0]*tmp_cos)-(displacement[2]*tmp_sin);
+	tmp_z = (displacement[0]*tmp_sin)+(displacement[2]*tmp_cos);
 	tmp_x = tmp;
+	tmp_y = displacement[1];
+
+	*/
+
+	displacement = mult(rotation_matrix, displacement);
+	tmp_z = displacement[0];
+	tmp_y = displacement[1];
+	tmp_x = displacement[2];
+
 
 	let where_it_wants_to_go = [camera_pos[0] + tmp_z, camera_pos[1] + tmp_y, camera_pos[2] + tmp_x];
 	let local_camera_pos = global_coords_to_local_coords(camera_pos[0], camera_pos[2]);
@@ -392,7 +347,6 @@ function onTimer() {
 				//todo
 			} else {
 				if (chunks[local_camera_pos.id].map[local_camera_pos.x+1][local_camera_pos.z] > chunks[local_camera_pos.id].map[local_camera_pos.x][local_camera_pos.z]) {
-
 					alert_flag = ((chunks[local_camera_pos.id].map[local_camera_pos.x+1][local_camera_pos.z] + 1.8) > camera_pos[1]) ;
 				}
 			}
@@ -486,7 +440,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	function add_vertical_cloud(from_cloud, to_cloud, x, z, which_side) {
 		if (from_cloud == to_cloud) return;
 
-		let instance_matrix = scale4(chunk_size/cloud_size/4, 1.0, chunk_size/cloud_size);
+		let instance_matrix = scale4(chunk_size*.5/cloud_size, 1.0, chunk_size/cloud_size);
 
 		switch (which_side) {
 		case 0: //a sinistra
@@ -494,7 +448,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult( rotate(-90, 0, 0, 1), instance_matrix );
 				instance_matrix_array.push( mult(translate(x,80,z), instance_matrix) );
 				shading_array.push(0.5);
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
+				texture_coord_array.push(textures["snow"]);
 				polygons++;
 			} else {
 				instance_matrix = mult( rotate(180, 0, 1, 0), instance_matrix );
@@ -502,7 +456,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x,80,z+(chunk_size/cloud_size)), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.9);
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
+				texture_coord_array.push(textures["snow"]);
 				polygons++;
 			}
 			break;
@@ -513,7 +467,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x+(chunk_size/cloud_size),80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.7);
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
+				texture_coord_array.push(textures["snow"]);
 				polygons++;
 			} else {
 				instance_matrix = mult( rotate(-90, 0, 1, 0), instance_matrix );
@@ -521,7 +475,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x,80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.7);
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
+				texture_coord_array.push(textures["snow"]);
 				polygons++;
 			}
 			break;
@@ -536,7 +490,6 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 
 	}
 
-
 	function add_vertical_terrain(from_y, to_y, x, z, which_side) {
 		from_y++;
 		to_y++;
@@ -548,12 +501,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.5);
 					if (y==from_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(vec2(5/16+11/256,15/16-1/256)); //terra e neve
+							texture_coord_array.push(textures["dirty snow"]);
 						} else {
-							texture_coord_array.push(vec2(2/16+5/256,15/16-1/256)); //terra e erba
+							texture_coord_array.push(textures["dirty grass"]);
 						}
 					} else {
-						texture_coord_array.push(vec2(1/16+(3/256),15/16-(1/256))); // terra
+						texture_coord_array.push(textures["dirt"]);
 					}
 					polygons++;
 				}
@@ -566,12 +519,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.9);
 					if (y==to_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(vec2(5/16+11/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty snow"]);
 						} else {
-							texture_coord_array.push(vec2(2/16+5/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty grass"]);
 						}
 					} else {
-						texture_coord_array.push(vec2(1/16+(3/256),15/16-(1/256))); //vec2(1/16,15/16)
+						texture_coord_array.push(textures["dirt"]);
 					}
 					polygons++;
 				}
@@ -587,12 +540,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.7);
 					if (y==from_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(vec2(5/16+11/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty snow"]);
 						} else {
-							texture_coord_array.push(vec2(2/16+5/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty grass"]);
 						}
 					} else {
-						texture_coord_array.push(vec2(1/16+(3/256),15/16-(1/256)));
+						texture_coord_array.push(textures["dirt"]);
 					}
 					polygons++;
 				}
@@ -605,12 +558,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.7);
 					if (y==to_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(vec2(5/16+11/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty snow"]);
 						} else {
-							texture_coord_array.push(vec2(2/16+5/256,15/16-1/256));
+							texture_coord_array.push(textures["dirty grass"]);
 						}
 					} else {
-						texture_coord_array.push(vec2(1/16+(3/256),15/16-(1/256)));
+						texture_coord_array.push(textures["dirt"]);
 					}
 					polygons++;
 				}
@@ -633,24 +586,16 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			let translate_z = (z+offsetZ);
 			this.map[x][z] =  Math.floor(noise(translate_x/noise_reduction, translate_z/noise_reduction)*chunk_peak);
 			if (this.map[x][z] > snow_level) {
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256)); // neve
+				texture_coord_array.push(textures["snow"]); // neve
 			} else if (this.map[x][z] <= water_level) {
 				this.map[x][z] = water_level;
-				texture_coord_array.push(vec2(6/16+13/256,15/16-1/256)); // acqua
+				texture_coord_array.push(textures["water"]); // acqua
 			} else {
-				texture_coord_array.push(vec2(1/256,15/16-(1/256))); //erba
+				texture_coord_array.push(textures["grass"]); //erba
 			}
 			instance_matrix_array.push(translate(translate_x,this.map[x][z],translate_z));
 			shading_array.push(1.0);
-			/*
-			nuvole
-			if (this.map[x][z]>40) {
-				instance_matrix_array.push(mult(translate(translate_x,70,translate_z),rotate(180,1,0,0)));
-				shading_array.push(1.0);
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
-				polygons++;
-			}
-			*/
+
 			if (x==0) {
 				if (left_chunk) {
 					add_vertical_terrain(this.map[0][z], left_chunk.map[chunk_size-1][z], translate_x, translate_z, 0);
@@ -679,7 +624,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			let translate_z = (((z+1)*chunk_size/cloud_size)+offsetZ);
 			this.cloud_map[x][z] = noise(cloud_x*15/noise_reduction, cloud_z*15/noise_reduction) > .65;
 			if (this.cloud_map[x][z]) {
-				texture_coord_array.push(vec2(4/16+9/256,15/16-1/256));
+				texture_coord_array.push(textures["snow"]);
 				instance_matrix_array.push( mult(translate(translate_x,80,translate_z), instance_matrix) );
 				shading_array.push(1.0);
 				polygons++;
@@ -734,7 +679,6 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	}
 	gl.bufferData(gl.ARRAY_BUFFER, superfloat, gl.STATIC_DRAW);
 	/*
-	gl.bindBuffer(gl.ARRAY_BUFFER, this.instance_matrix_buffer ); // TODO forse non serve ribindarlo subito, fare un test commentando questa riga
 	gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.instance_matrix_array, 0, this.instance_matrix_array.length * 16 * 4); // questo a quanto pare gli passa effettivamente i dati
 	?? gl.bufferSubData(gl.ARRAY_BUFFER, 0, superfloat); ??
 	*/
@@ -780,10 +724,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 		  gl.vertexAttribDivisor(loc, 1);
 
 		}
-		/*
-		for(let i=0; i<1; i++) {
-			gl.drawArrays(gl.TRIANGLE_FAN, 4*i, 4);
-		}*/
+
 		gl.drawArraysInstanced(gl.TRIANGLE_FAN, 0, 4, polygons);
 		// mode, offset, num vertices per instance, num instances
 	};
@@ -802,8 +743,7 @@ window.onload = function init() {
 	if ( !gl ) { alert( "WebGL isn't available" ); }
 
 	canvas.width = (document.getElementsByTagName('body')[0]).clientWidth;
-	//canvas.height = window.innerHeight; //(document.getElementsByTagName('body')[0]).clientHeight;
-	canvas.height = document.documentElement.clientHeight-20; //(document.getElementsByTagName('body')[0]).clientHeight;
+	canvas.height = document.documentElement.clientHeight-20;
 
 	gl.viewport( 0, 0, canvas.width, canvas.height );
 	gl.clearColor( 0.7, 0.8, 1.0, 1.0 );
@@ -935,8 +875,6 @@ window.onload = function init() {
 		camera_alfa = (2 * Math.PI) + camera_alfa;
 		camera_alfa = camera_alfa % (2 * Math.PI);
 		*/
-		//camera_alfa = camera_alfa % Math.PI;
-		//camera_beta = camera_beta % Math.PI;
 		update_lookAt();
 		compute_camera_matrix();
 	};
