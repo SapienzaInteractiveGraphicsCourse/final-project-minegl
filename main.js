@@ -18,7 +18,7 @@ var mouse_alfa;
 var mouse_beta;
 var mouse_pressing = false;
 
-var camera_pos = vec3(25,50,25);
+var camera_pos = vec3(75,70,75);
 //var camera_pos = vec3(0,10,0);
 var camera_lookat = vec3(0,0,0);
 
@@ -51,68 +51,97 @@ function scale4(a, b, c) {
 
 // texture
 
+var texSize = 256;
+var image_texture = new Uint8Array(4*texSize*texSize);
+var bordo = 8; //max 8
+
 var textures = {
-	"grass": vec2(1/256,15/16-(1/256)),
-	"dirty grass": vec2(2/16+5/256,15/16-1/256),
-	"snow": vec2(4/16+9/256,15/16-1/256),
-	"dirty snow": vec2(5/16+11/256,15/16-1/256),
-	"dirt": vec2(1/16+(3/256),15/16-(1/256)),
-	"water": vec2(6/16+13/256,15/16-1/256)
+	grass: vec2(bordo/256,15/16-(bordo/256)),
+	dirty_grass: vec2(2/16+(5*bordo/256),15/16-bordo/256),
+	cloud: vec2(3/16+(7*bordo/256),15/16-bordo/256),
+	snow: vec2(4/16+9*bordo/256,15/16-bordo/256),
+	dirty_snow: vec2(5/16+11*bordo/256,15/16-bordo/256),
+	dirt: vec2(1/16+(3*bordo/256),15/16-(bordo/256)),
+	water: vec2(6/16+13*bordo/256,15/16-bordo/256)
 };
 
 /*
-verde
-82
-137
-0
+creature_center_y = {human: 1.8, horse: 0, spider: 0};
+var textures = {
+	"grass": vec2(0,0),
+	"dirty grass": vec2(0,0),
+	"snow": vec2(0,0),
+	"dirty snow": vec2(0,0),
+	"dirt": vec2(0,0),
+	"water": vec2(0,0)
+};*/
 
-marrone
-118
-83
-0
-
-bianco
-219
-224
-230
-
-blu
-16
-82
-212
-
-grigio
-156
-156
-156
-
-blu
-0
-18
-179
-*/
-
-var texSize = 256;
-var image_texture = new Uint8Array(4*texSize*texSize);
 
 for ( var i = 0; i < texSize; i++ ) {
 	for ( var j = 0; j <texSize; j++ ) {
-		image_texture[4*i*texSize+4*j] = 0;
-		image_texture[4*i*texSize+4*j+1] = 0;
-		image_texture[4*i*texSize+4*j+2] = 0;
-		image_texture[4*i*texSize+4*j+3] = 0;
-		/*
 		image_texture[4*i*texSize+4*j] = 255;
 		image_texture[4*i*texSize+4*j+1] = 0;
 		image_texture[4*i*texSize+4*j+2] = 255;
-		image_texture[4*i*texSize+4*j+3] = 255;*/
+		image_texture[4*i*texSize+4*j+3] = 255;
 	}
 }
 
-for ( var i = 0; i < 14; i++ ) {
-	for ( var j = 0; j <14; j++ ) {
-		var temp_x = i*18 + 1;
-		var temp_y = j*18 + 1;
+function copia(da_x, da_y, a_x, a_y) {
+	image_texture[4*a_x*texSize+4*a_y] = image_texture[4*da_x*texSize+4*da_y];
+	image_texture[4*a_x*texSize+4*a_y+1] = image_texture[4*da_x*texSize+4*da_y+1];
+	image_texture[4*a_x*texSize+4*a_y+2] = image_texture[4*da_x*texSize+4*da_y+2];
+	image_texture[4*a_x*texSize+4*a_y+3] = image_texture[4*da_x*texSize+4*da_y+3];
+}
+
+function intorno(offx, offy) {
+	for (var x = 0; x < 16; x++) {
+		for (var y = -bordo; y < 0; y++) {
+			copia(offx+x, offy, offx+x, offy+y);
+		}
+		for (var y = 16; y < 16+bordo; y++) {
+			copia(offx+x, offy+15, offx+x, offy+y);
+		}
+	}
+
+	for (var y = 0; y < 16; y++) {
+		for (var x = -bordo; x < 0; x++) {
+			copia(offx, offy+y, offx+x, offy+y);
+		}
+		for (var x = 16; x < 16+bordo; x++) {
+			copia(offx+15, offy+y, offx+x, offy+y);
+		}
+	}
+
+	for (var x = -bordo; x < 0; x++) {
+		for (var y = -bordo; y < 0; y++) {
+			copia(offx, offy, offx+x, offy+y);
+		}
+	}
+
+	for (var x = 16; x < 16+bordo; x++) {
+		for (var y = -bordo; y < 0; y++) {
+			copia(offx+15, offy, offx+x, offy+y);
+		}
+	}
+
+	for (var x = -bordo; x < 0; x++) {
+		for (var y = 16; y < 16+bordo; y++) {
+			copia(offx, offy+15, offx+x, offy+y);
+		}
+	}
+
+	for (var x = 16; x < 16+bordo; x++) {
+		for (var y = 16; y < 16+bordo; y++) {
+			copia(offx+15, offy+15, offx+x, offy+y);
+		}
+	}
+
+}
+
+for ( var i = 0; i < 1; i++ ) {
+	for ( var j = 0; j <8; j++ ) {
+		var temp_x = i*(16 + (bordo*2)) + bordo;
+		var temp_y = j*(16 + (bordo*2)) + bordo;
 		for (var x = 0; x < 16; x++) {
 			for (var y = 0; y < 16; y++) {
 				var red_variation = Math.floor(Math.random()*20)-10;
@@ -145,8 +174,11 @@ for ( var i = 0; i < 14; i++ ) {
 						image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+3] = 255;
 					}
 				} else if (i==0&&j==3) {
-					// ? pietra
-
+					// nuvole
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)] = 255;
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+1] = 255;
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+2] = 255;
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+3] = 255;
 				} else if (i==0&&j==4) {
 					// neve
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)] = 219 + red_variation;
@@ -173,35 +205,9 @@ for ( var i = 0; i < 14; i++ ) {
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+2] = 179 + blue_variation;
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+3] = 255;
 				}
-
-
-				if (x==0) {
-					image_texture[4*(temp_x-1)*texSize+4*(temp_y+y)] = image_texture[4*(temp_x)*texSize+4*(temp_y+y)];
-					image_texture[4*(temp_x-1)*texSize+4*(temp_y+y)+1] = image_texture[4*(temp_x)*texSize+4*(temp_y+y)+1];
-					image_texture[4*(temp_x-1)*texSize+4*(temp_y+y)+2] = image_texture[4*(temp_x)*texSize+4*(temp_y+y)+2];
-					image_texture[4*(temp_x-1)*texSize+4*(temp_y+y)+3] = image_texture[4*(temp_x)*texSize+4*(temp_y+y)+3];
-				} else if (x==15) {
-					image_texture[4*(temp_x+16)*texSize+4*(temp_y+y)] = image_texture[4*(temp_x+15)*texSize+4*(temp_y+y)];
-					image_texture[4*(temp_x+16)*texSize+4*(temp_y+y)+1] = image_texture[4*(temp_x+15)*texSize+4*(temp_y+y)+1];
-					image_texture[4*(temp_x+16)*texSize+4*(temp_y+y)+2] = image_texture[4*(temp_x+15)*texSize+4*(temp_y+y)+2];
-					image_texture[4*(temp_x+16)*texSize+4*(temp_y+y)+3] = image_texture[4*(temp_x+15)*texSize+4*(temp_y+y)+3];
-				}
-
-
-			} // fine for y
-
-			//for (var y = 0; y < 16; y++) {
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y-1)] = image_texture[4*(temp_x+x)*texSize+4*(temp_y)]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y-1)+1] = image_texture[4*(temp_x+x)*texSize+4*(temp_y)+1]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y-1)+2] = image_texture[4*(temp_x+x)*texSize+4*(temp_y)+2]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y-1)+3] = image_texture[4*(temp_x+x)*texSize+4*(temp_y)+3]
-
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y+16)] = image_texture[4*(temp_x+x)*texSize+4*(temp_y+15)]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y+16)+1] = image_texture[4*(temp_x+x)*texSize+4*(temp_y+15)+1]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y+16)+2] = image_texture[4*(temp_x+x)*texSize+4*(temp_y+15)+2]
-			image_texture[4*(temp_x+x)*texSize+4*(temp_y+16)+3] = image_texture[4*(temp_x+x)*texSize+4*(temp_y+15)+3]
-
-		} // fine for x
+			}
+		}
+		intorno(temp_x, temp_y);
 	}
 }
 
@@ -246,28 +252,266 @@ function global_coords_to_local_coords(x, z) {
 
 //creature_center_y = {human: 1.8, horse: 0, spider: 0};
 
+var human_height = 1.5;
+
 function physics_engine(starting_vector, displacement_vector, creature_id) {
 	var local_starting_object = global_coords_to_local_coords(starting_vector[0], starting_vector[2]);
-	if (!local_starting_object) return displacement_vector;
+	if (!local_starting_object) {
+		starting_vector[0] += displacement_vector[0];
+		starting_vector[1] += displacement_vector[1];
+		starting_vector[2] += displacement_vector[2];
+		return true;
+	}
 	var current_chunk = chunks[local_starting_object.id];
 	var y_value_block_ahead;
-	if (displacement_vector[0]>0) {
+	var tmp1_chunk;
+	var tmp2_chunk;
+	var near_blocks = [
+		[-1, -1, -1],
+		[-1, -1, -1],
+		[-1, -1, -1]
+	];
 
-		if (local_starting_object.x==chunk_size-1) {
-			// TODO
-		} else {
-			y_value_block_ahead = current_chunk.map[local_camera_pos.x+1][local_camera_pos.z];
-		}
+	near_blocks[1][1] = current_chunk.map[local_starting_object.x][local_starting_object.z];
 
-		if ((y_value_block_ahead + 1.8) > displacement_vector[1]) {
-			if ( Math.floor(starting_vector[0]) + (11/16) < starting_vector[0] + displacement_vector[0] ) {
-				displacement_vector[0] = Math.floor(starting_vector[0]) + (11/16) - starting_vector[0];
+	tmp1_chunk = current_chunk;
+	if (local_starting_object.x==chunk_size-1) {
+		tmp1_chunk = current_chunk.right_chunk;
+		if (tmp1_chunk) {
+			near_blocks[1][2] = tmp1_chunk.map[0][local_starting_object.z];
+			if (local_starting_object.z==chunk_size-1) {
+				tmp2_chunk = tmp1_chunk.top_chunk;
+				if (tmp2_chunk) {
+					near_blocks[0][2] = tmp2_chunk.map[0][0];
+				}
+			} else {
+				near_blocks[0][2] = tmp1_chunk.map[0][local_starting_object.z+1];
+			}
+			if (local_starting_object.z==0) {
+				tmp2_chunk = tmp1_chunk.bottom_chunk;
+				if (tmp2_chunk) {
+					near_blocks[2][2] = tmp2_chunk.map[0][chunk_size-1];
+				}
+			} else {
+				near_blocks[2][2] = tmp1_chunk.map[0][local_starting_object.z-1];
 			}
 		}
-	} else if (displacement_vector[0]<0) {
-
+	} else {
+		near_blocks[1][2] = current_chunk.map[local_starting_object.x+1][local_starting_object.z];
+		if (local_starting_object.z==chunk_size-1) {
+			tmp2_chunk = current_chunk.top_chunk;
+			if (tmp2_chunk) {
+				near_blocks[0][2] = tmp2_chunk.map[local_starting_object.x+1][0];
+			}
+		} else {
+			near_blocks[0][2] = current_chunk.map[local_starting_object.x+1][local_starting_object.z+1];
+		}
+		if (local_starting_object.z==0) {
+			tmp2_chunk = current_chunk.bottom_chunk;
+			if (tmp2_chunk) {
+				near_blocks[2][2] = tmp2_chunk.map[local_starting_object.x+1][chunk_size-1];
+			}
+		} else {
+			near_blocks[2][2] = current_chunk.map[local_starting_object.x+1][local_starting_object.z-1];
+		}
 	}
+
+	tmp1_chunk = current_chunk;
+	if (local_starting_object.x==0) {
+		tmp1_chunk = current_chunk.left_chunk;
+		if (tmp1_chunk) {
+			near_blocks[1][0] = tmp1_chunk.map[chunk_size-1][local_starting_object.z];
+			if (local_starting_object.z==chunk_size-1) {
+				tmp2_chunk = tmp1_chunk.top_chunk;
+				if (tmp2_chunk) {
+					near_blocks[0][0] = tmp2_chunk.map[chunk_size-1][0];
+				}
+			} else {
+				near_blocks[0][0] = tmp1_chunk.map[chunk_size-1][local_starting_object.z+1];
+			}
+			if (local_starting_object.z==0) {
+				tmp2_chunk = tmp1_chunk.bottom_chunk;
+				if (tmp2_chunk) {
+					near_blocks[2][0] = tmp2_chunk.map[chunk_size-1][chunk_size-1];
+				}
+			} else {
+				near_blocks[2][0] = tmp1_chunk.map[chunk_size-1][local_starting_object.z-1];
+			}
+		}
+	} else {
+		near_blocks[1][0] = current_chunk.map[local_starting_object.x-1][local_starting_object.z];
+		if (local_starting_object.z==chunk_size-1) {
+			tmp2_chunk = current_chunk.top_chunk;
+			if (tmp2_chunk) {
+				near_blocks[0][0] = tmp2_chunk.map[local_starting_object.x-1][0];
+			}
+		} else {
+			near_blocks[0][0] = current_chunk.map[local_starting_object.x-1][local_starting_object.z+1];
+		}
+		if (local_starting_object.z==0) {
+			tmp2_chunk = current_chunk.bottom_chunk;
+			if (tmp2_chunk) {
+				near_blocks[2][0] = tmp2_chunk.map[local_starting_object.x-1][chunk_size-1];
+			}
+		} else {
+			near_blocks[2][0] = current_chunk.map[local_starting_object.x-1][local_starting_object.z-1];
+		}
+	}
+
+	if (local_starting_object.z==chunk_size-1) {
+		tmp1_chunk = current_chunk.top_chunk;
+		if (tmp1_chunk) {
+			near_blocks[0][1] = tmp1_chunk.map[local_starting_object.x][0];
+		}
+	} else {
+		near_blocks[0][1] = current_chunk.map[local_starting_object.x][local_starting_object.z+1];
+	}
+
+	if (local_starting_object.z==0) {
+		tmp1_chunk = current_chunk.bottom_chunk;
+		if (tmp1_chunk) {
+			near_blocks[2][1] = tmp1_chunk.map[local_starting_object.x][chunk_size-1];
+		}
+	} else {
+		near_blocks[2][1] = current_chunk.map[local_starting_object.x][local_starting_object.z-1];
+	}
+
+	//--------------------- x movement
+	if (displacement_vector[0] > 0) {
+		y_value_block_ahead = near_blocks[1][2];
+		if (creature_id==0) y_value_block_ahead += human_height;
+		if (y_value_block_ahead > starting_vector[1]) {
+			var boundary = Math.floor(starting_vector[0]) + (11/16);
+			if (starting_vector[0] + displacement_vector[0] > boundary) {
+				displacement_vector[0] = boundary - starting_vector[0];
+				// se non e' umano, sale
+			}
+		}
+	} else if (displacement_vector[0] < 0) {
+		y_value_block_ahead = near_blocks[1][0];
+		if (creature_id==0) y_value_block_ahead += human_height;
+		if (y_value_block_ahead > starting_vector[1]) {
+			var boundary = Math.floor(starting_vector[0]) + (5/16);
+			if (starting_vector[0] + displacement_vector[0] < boundary) {
+				displacement_vector[0] = boundary - starting_vector[0];
+				// se non e' umano, sale
+			}
+		}
+	}
+	starting_vector[0] += displacement_vector[0];
+
+	//--------------------- z movement
+	if (displacement_vector[2] > 0) {
+		y_value_block_ahead = near_blocks[0][1];
+		if (creature_id==0) y_value_block_ahead += human_height;
+		if (y_value_block_ahead > starting_vector[1]) {
+			var boundary = Math.floor(starting_vector[2]) + (11/16);
+			if (starting_vector[2] + displacement_vector[2] > boundary) {
+				displacement_vector[2] = boundary - starting_vector[2];
+				// se non e' umano, sale
+			}
+		}
+	} else if (displacement_vector[2] < 0) {
+		y_value_block_ahead = near_blocks[2][1];
+		if (creature_id==0) y_value_block_ahead += human_height;
+		if (y_value_block_ahead > starting_vector[1]) {
+			var boundary = Math.floor(starting_vector[2]) + (5/16);
+			if (starting_vector[2] + displacement_vector[2] < boundary) {
+				displacement_vector[2] = boundary - starting_vector[2];
+				// se non e' umano, sale
+			}
+		}
+	}
+	starting_vector[2] += displacement_vector[2];
+
+	//--------------------- y movement
+	if (displacement_vector[1] < 0) {
+		var y_value_block_below = near_blocks[1][1];
+		var boundary = Math.floor(starting_vector[0]) + (5/16);
+		if (starting_vector[0] < boundary) {
+			if (near_blocks[1][0] > y_value_block_below) {
+				if (near_blocks[1][0] < starting_vector[1] - human_height) {
+					y_value_block_below = near_blocks[1][0];
+				}
+			}
+			boundary = Math.floor(starting_vector[2]) + (5/16);
+			if (starting_vector[2] < boundary) {
+				if (near_blocks[2][0] > y_value_block_below) {
+					if (near_blocks[2][0] < starting_vector[1] - human_height) {
+						y_value_block_below = near_blocks[2][0];
+					}
+				}
+			}
+			boundary = Math.floor(starting_vector[2]) + (11/16);
+			if (starting_vector[2] > boundary) {
+				if (near_blocks[0][0] > y_value_block_below) {
+					if (near_blocks[0][0] < starting_vector[1] - human_height) {
+						y_value_block_below = near_blocks[0][0];
+					}
+				}
+			}
+		}
+
+		boundary = Math.floor(starting_vector[0]) + (11/16);
+		if (starting_vector[0] > boundary) {
+			if (near_blocks[1][2] > y_value_block_below) {
+				if (near_blocks[1][2] < starting_vector[1] - human_height) {
+					y_value_block_below = near_blocks[1][2];
+				}
+			}
+			boundary = Math.floor(starting_vector[2]) + (5/16);
+			if (starting_vector[2] < boundary) {
+				if (near_blocks[2][2] > y_value_block_below) {
+					if (near_blocks[2][2] < starting_vector[1] - human_height) {
+						y_value_block_below = near_blocks[2][2];
+					}
+				}
+			}
+			boundary = Math.floor(starting_vector[2]) + (11/16);
+			if (starting_vector[2] > boundary) {
+				if (near_blocks[0][2] > y_value_block_below) {
+					if (near_blocks[0][2] < starting_vector[1] - human_height) {
+						y_value_block_below = near_blocks[0][2];
+					}
+				}
+			}
+		}
+
+		boundary = Math.floor(starting_vector[2]) + (5/16);
+		if (starting_vector[2] < boundary) {
+			if (near_blocks[2][1] > y_value_block_below) {
+				if (near_blocks[2][1] < starting_vector[1] - human_height) {
+					y_value_block_below = near_blocks[2][1];
+				}
+			}
+		}
+
+		boundary = Math.floor(starting_vector[2]) + (11/16);
+		if (starting_vector[2] > boundary) {
+			if (near_blocks[0][1] > y_value_block_below) {
+				if (near_blocks[0][1] < starting_vector[1] - human_height) {
+					y_value_block_below = near_blocks[0][1];
+				}
+			}
+		}
+		//--------------------------
+		y_value_block_below += human_height;
+		if (starting_vector[1] + displacement_vector[1] < y_value_block_below) {
+			displacement_vector[1] = y_value_block_below - starting_vector[1];
+
+			starting_vector[1] = y_value_block_below;
+			return true;
+		}
+	}
+
+
+	starting_vector[1] += displacement_vector[1];
+	return false;
+
 }
+
+var gravity = true;
+var inerzia = vec3(0,0.001,0);
 
 function onTimer() {
 	//console.log(Date.now()-last_time); last_time = Date.now();
@@ -282,10 +526,6 @@ function onTimer() {
 	var displacement = vec3(0,0,0);
 	let number_of_axis_displacements = 0;
 
-	let tmp_x = 0.0;
-	let tmp_y = 0.0;
-	let tmp_z = 0.0;
-	let tmp;
 	//--------------
 	if (key_pressed[0] && !key_pressed[2]) {
 		displacement[0] = 1.0;
@@ -304,14 +544,17 @@ function onTimer() {
 	}
 
 	if (key_pressed[4] && !key_pressed[5]) {
-		displacement[1] = -1.0;
-		number_of_axis_displacements++;
+		//displacement[1] = -1.0;
+		//number_of_axis_displacements++;
 	} else if (key_pressed[5] && !key_pressed[4]) {
-		displacement[1] = 1.0;
-		number_of_axis_displacements++;
+		//displacement[1] = 1.0;
+		if (!gravity) {
+			inerzia[1]=0.1;
+		}
+		//number_of_axis_displacements++;
 	}
 
-	if (number_of_axis_displacements==0) return;
+	if (number_of_axis_displacements==0&&inerzia[0]==0&&inerzia[1]==0&&inerzia[2]==0) return;
 	else if (number_of_axis_displacements==2) {
 		//0.70710678118 is equal to 1/(2^0.5)
 		displacement = mult(0.70710678118, displacement);
@@ -319,63 +562,29 @@ function onTimer() {
 		//0.57735026919 is equal to 1/(3^0.5)
 		displacement = mult(0.57735026919, displacement);
 	}
-
-	//displacement = mult(0.035, displacement); //slow down
-
-	/*
-	tmp = (displacement[0]*tmp_cos)-(displacement[2]*tmp_sin);
-	tmp_z = (displacement[0]*tmp_sin)+(displacement[2]*tmp_cos);
-	tmp_x = tmp;
-	tmp_y = displacement[1];
-
-	*/
+	gravity = true;
+	displacement = mult(0.05, displacement); //slow down
+	displacement = add(inerzia, displacement);
 
 	displacement = mult(rotation_matrix, displacement);
-	tmp_z = displacement[0];
-	tmp_y = displacement[1];
-	tmp_x = displacement[2];
+	if (physics_engine(camera_pos, displacement, 0)) {
+		inerzia[0] = 0;
+		inerzia[1] = 0;
+		inerzia[2] = 0;
+		gravity = false;
+	}
 
-
-	let where_it_wants_to_go = [camera_pos[0] + tmp_z, camera_pos[1] + tmp_y, camera_pos[2] + tmp_x];
-	let local_camera_pos = global_coords_to_local_coords(camera_pos[0], camera_pos[2]);
-	//let local_where_it_wants_to_go = global_coords_to_local_coords(where_it_wants_to_go);
-	let alert_flag = false;
-	if (local_camera_pos) {
-		if (tmp_z>0) {
-
-			if (local_camera_pos.x==chunk_size-1) {
-				//todo
-			} else {
-				if (chunks[local_camera_pos.id].map[local_camera_pos.x+1][local_camera_pos.z] > chunks[local_camera_pos.id].map[local_camera_pos.x][local_camera_pos.z]) {
-					alert_flag = ((chunks[local_camera_pos.id].map[local_camera_pos.x+1][local_camera_pos.z] + 1.8) > camera_pos[1]) ;
-				}
-			}
-			if (alert_flag) {
-				let local_where_it_wants_to_go = where_it_wants_to_go[0] % chunk_size;
-				if (local_where_it_wants_to_go > local_camera_pos.x + (11/16)) {
-					where_it_wants_to_go[0] = where_it_wants_to_go[0] - local_where_it_wants_to_go + local_camera_pos.x + (11/16);
-					tmp_z = 0;
-				}
-			}
-		} else if (tmp_z<0) {
-
+	if (gravity) {
+		if (inerzia[1]> -1.0) {
+			inerzia[1] -= 0.003;
 		}
 	}
 
-
-	camera_pos[0] = where_it_wants_to_go[0];
-	camera_pos[1] = where_it_wants_to_go[1];
-	camera_pos[2] = where_it_wants_to_go[2];
-	/*
-	camera_pos[0] += tmp_z;
-	camera_pos[1] += tmp_y;
-	camera_pos[2] += tmp_x;
-	*/
-	camera_lookat[0] += tmp_z;
-	camera_lookat[1] += tmp_y;
-	camera_lookat[2] += tmp_x;
+	//camera_pos = add(camera_pos, displacement);
+	camera_lookat = add(camera_lookat, displacement);
 
 	/*
+	genera nuovi chunk
 	if (camera_pos[2]>50) {
 		if (!chunks[3]) {
 			chunks[3] = new chunk(50,50);
@@ -420,6 +629,25 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	this.offset = [offsetX, offsetZ];
 	this.map = [];
 	this.cloud_map = [];
+	this.near_chunks = [false, false, false, false];
+	if (left_chunk) {
+		this.near_chunks[0] = !left_chunk.near_chunks[3];
+	}
+	if (right_chunk) {
+		this.near_chunks[3] = !right_chunk.near_chunks[0];
+	}
+	if (top_chunk) {
+		this.near_chunks[1] = !top_chunk.near_chunks[2];
+	}
+	if (bottom_chunk) {
+		this.near_chunks[2] = !bottom_chunk.near_chunks[1];
+	}
+	this.left_chunk = left_chunk;
+	this.top_chunk = top_chunk;
+	this.bottom_chunk = bottom_chunk;
+	this.right_chunk = right_chunk;
+
+
 
 	this.vertex_buffer;
 	this.vertex_array = [];
@@ -448,7 +676,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult( rotate(-90, 0, 0, 1), instance_matrix );
 				instance_matrix_array.push( mult(translate(x,80,z), instance_matrix) );
 				shading_array.push(0.5);
-				texture_coord_array.push(textures["snow"]);
+				texture_coord_array.push(textures.cloud);
 				polygons++;
 			} else {
 				instance_matrix = mult( rotate(180, 0, 1, 0), instance_matrix );
@@ -456,7 +684,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x,80,z+(chunk_size/cloud_size)), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.9);
-				texture_coord_array.push(textures["snow"]);
+				texture_coord_array.push(textures.cloud);
 				polygons++;
 			}
 			break;
@@ -467,7 +695,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x+(chunk_size/cloud_size),80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.7);
-				texture_coord_array.push(textures["snow"]);
+				texture_coord_array.push(textures.cloud);
 				polygons++;
 			} else {
 				instance_matrix = mult( rotate(-90, 0, 1, 0), instance_matrix );
@@ -475,7 +703,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(translate(x,80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
 				shading_array.push(0.7);
-				texture_coord_array.push(textures["snow"]);
+				texture_coord_array.push(textures.cloud);
 				polygons++;
 			}
 			break;
@@ -501,12 +729,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.5);
 					if (y==from_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(textures["dirty snow"]);
+							texture_coord_array.push(textures.dirty_snow);
 						} else {
-							texture_coord_array.push(textures["dirty grass"]);
+							texture_coord_array.push(textures.dirty_grass);
 						}
 					} else {
-						texture_coord_array.push(textures["dirt"]);
+						texture_coord_array.push(textures.dirt);
 					}
 					polygons++;
 				}
@@ -519,12 +747,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.9);
 					if (y==to_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(textures["dirty snow"]);
+							texture_coord_array.push(textures.dirty_snow);
 						} else {
-							texture_coord_array.push(textures["dirty grass"]);
+							texture_coord_array.push(textures.dirty_grass);
 						}
 					} else {
-						texture_coord_array.push(textures["dirt"]);
+						texture_coord_array.push(textures.dirt);
 					}
 					polygons++;
 				}
@@ -540,12 +768,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.7);
 					if (y==from_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(textures["dirty snow"]);
+							texture_coord_array.push(textures.dirty_snow);
 						} else {
-							texture_coord_array.push(textures["dirty grass"]);
+							texture_coord_array.push(textures.dirty_grass);
 						}
 					} else {
-						texture_coord_array.push(textures["dirt"]);
+						texture_coord_array.push(textures.dirt);
 					}
 					polygons++;
 				}
@@ -558,12 +786,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					shading_array.push(0.7);
 					if (y==to_y-1) {
 						if (y>snow_level) {
-							texture_coord_array.push(textures["dirty snow"]);
+							texture_coord_array.push(textures.dirty_snow);
 						} else {
-							texture_coord_array.push(textures["dirty grass"]);
+							texture_coord_array.push(textures.dirty_grass);
 						}
 					} else {
-						texture_coord_array.push(textures["dirt"]);
+						texture_coord_array.push(textures.dirt);
 					}
 					polygons++;
 				}
@@ -586,25 +814,25 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			let translate_z = (z+offsetZ);
 			this.map[x][z] =  Math.floor(noise(translate_x/noise_reduction, translate_z/noise_reduction)*chunk_peak);
 			if (this.map[x][z] > snow_level) {
-				texture_coord_array.push(textures["snow"]); // neve
+				texture_coord_array.push(textures.snow);
 			} else if (this.map[x][z] <= water_level) {
 				this.map[x][z] = water_level;
-				texture_coord_array.push(textures["water"]); // acqua
+				texture_coord_array.push(textures.water);
 			} else {
-				texture_coord_array.push(textures["grass"]); //erba
+				texture_coord_array.push(textures.grass);
 			}
 			instance_matrix_array.push(translate(translate_x,this.map[x][z],translate_z));
 			shading_array.push(1.0);
 
 			if (x==0) {
-				if (left_chunk) {
+				if (this.near_chunks[0]) {
 					add_vertical_terrain(this.map[0][z], left_chunk.map[chunk_size-1][z], translate_x, translate_z, 0);
 				}
 			}else{
 				add_vertical_terrain(this.map[x][z], this.map[x-1][z], translate_x, translate_z, 0);
 			}
 			if (z==0) {
-				if (bottom_chunk) {
+				if (this.near_chunks[2]) {
 					add_vertical_terrain(this.map[x][z], bottom_chunk.map[x][chunk_size-1], translate_x, translate_z, 1);
 				}
 			} else {
@@ -624,21 +852,21 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			let translate_z = (((z+1)*chunk_size/cloud_size)+offsetZ);
 			this.cloud_map[x][z] = noise(cloud_x*15/noise_reduction, cloud_z*15/noise_reduction) > .65;
 			if (this.cloud_map[x][z]) {
-				texture_coord_array.push(textures["snow"]);
+				texture_coord_array.push(textures.cloud);
 				instance_matrix_array.push( mult(translate(translate_x,80,translate_z), instance_matrix) );
 				shading_array.push(1.0);
 				polygons++;
 			}
 
 			if (x==0) {
-				if (left_chunk) {
+				if (this.near_chunks[0]) {
 					add_vertical_cloud(this.cloud_map[x][z], left_chunk.cloud_map[cloud_size-1][z], translate_x, ((z*chunk_size/cloud_size)+offsetZ), 0);
 				}
 			}else{
 				add_vertical_cloud(this.cloud_map[x][z], this.cloud_map[x-1][z], translate_x, ((z*chunk_size/cloud_size)+offsetZ), 0);
 			}
 			if (z==0) {
-				if (bottom_chunk) {
+				if (this.near_chunks[2]) {
 					add_vertical_cloud(this.cloud_map[x][z], bottom_chunk.cloud_map[x][cloud_size-1], translate_x, ((z*chunk_size/cloud_size)+offsetZ), 1);
 				}
 			} else {
@@ -802,6 +1030,26 @@ window.onload = function init() {
 	chunks[7] = new chunkT(chunk_size,2*chunk_size,chunks[6],null,chunks[4]);
 	chunks[8] = new chunkT(2*chunk_size,2*chunk_size,chunks[7],null,chunks[5]);
 
+	chunks[0].right_chunk = chunks[1];
+	chunks[0].top_chunk = chunks[3];
+
+	chunks[1].right_chunk = chunks[2];
+	chunks[1].top_chunk = chunks[4];
+
+	chunks[2].top_chunk = chunks[5];
+
+	chunks[3].right_chunk = chunks[4];
+	chunks[3].top_chunk = chunks[6];
+
+	chunks[4].right_chunk = chunks[5];
+	chunks[4].top_chunk = chunks[7];
+
+	chunks[5].top_chunk = chunks[8];
+
+	chunks[6].right_chunk = chunks[7];
+
+	chunks[7].right_chunk = chunks[8];
+
 	document.onkeydown = function(e){
 		if (e.key=="w"||e.key=="W") {
 			key_pressed[0] = true;
@@ -886,7 +1134,7 @@ window.onload = function init() {
 
 	//var imgList = ["texture0.jpg", "texture1.png", "texture2.jpeg", "texture3.jpg"];
 	//loadImages(imgList);
-	//render();
+
 	renderS();
 }
 

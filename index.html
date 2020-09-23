@@ -22,6 +22,7 @@ void main()
 	fs_shading = vs_shading;
 
 	fTexCoord = vTexCoord;
+
 	switch (gl_VertexID) {
 	case 1:
 	    fTexCoord.y += 0.0625;
@@ -33,7 +34,32 @@ void main()
 	case 3:
 		fTexCoord.x += 0.0625;
 		break;
-	}
+	}/*
+	switch (gl_VertexID) {
+	case 1:
+	    fTexCoord.y += 0.03;
+	    break;
+	case 2:
+		fTexCoord.x += 0.03;
+		fTexCoord.y += 0.03;
+		break;
+	case 3:
+		fTexCoord.x += 0.03;
+		break;
+	}*/
+	/*
+	switch (gl_VertexID) {
+	case 1:
+	    fTexCoord.y += 1.0;
+	    break;
+	case 2:
+		fTexCoord.x += 1.0;
+		fTexCoord.y += 1.0;
+		break;
+	case 3:
+		fTexCoord.x += 1.0;
+		break;
+	}*/
 
 	//gl_Position = projectionMatrix * modelViewMatrix * vPosition;
 	gl_Position = projectionMatrix * matrix * vPosition;
