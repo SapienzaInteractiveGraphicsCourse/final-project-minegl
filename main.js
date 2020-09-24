@@ -10,6 +10,8 @@ var projectionMatrixLoc;
 var modelViewMatrix;
 var modelViewMatrixLoc;
 var instanceMatrix;
+var fs_sunlinght_direction;
+var fs_sunlinght_color;
 
 // Navigate
 var mouse_x;
@@ -24,6 +26,7 @@ var camera_lookat = vec3(0,0,0);
 
 var camera_alfa = 0; //Math.PI/2;
 var camera_beta = -1.0;
+var time = 0;
 //var camera_alfa = 2.438;
 //var camera_beta = -1.0;
 //var camera_alfa = radians(180);
@@ -513,6 +516,17 @@ function physics_engine(starting_vector, displacement_vector, creature_id) {
 var gravity = true;
 var inerzia = vec3(0,0.001,0);
 
+function parabola(x, c) {
+	var a = -100*c/(11*Math.PI*Math.PI);
+	var b = 100*c/(11*Math.PI);
+	return a*x*x + b*x + c;
+}
+
+function parabola2(x, a) {
+	var b = -a*Math.PI;
+	return a*x*x + b*x;
+}
+
 function onTimer() {
 	//console.log(Date.now()-last_time); last_time = Date.now();
 
@@ -543,29 +557,45 @@ function onTimer() {
 		number_of_axis_displacements++;
 	}
 
-	if (key_pressed[4] && !key_pressed[5]) {
-		//displacement[1] = -1.0;
-		//number_of_axis_displacements++;
-	} else if (key_pressed[5] && !key_pressed[4]) {
-		//displacement[1] = 1.0;
+	if (key_pressed[5]) {
 		if (!gravity) {
 			inerzia[1]=0.1;
 		}
-		//number_of_axis_displacements++;
 	}
+
+	if (key_pressed[4]) {
+		time += 0.005;
+	}
+
+	time += 0.0001;
+	time = time % (2 * Math.PI);
+	time = time + (2 * Math.PI);
+	time = time % (2 * Math.PI);
+	console.log(time);
+	gl.uniform3f(fs_sunlinght_direction, Math.cos(time), Math.sin(time), 0.0);
+
+	var sun_red_color = parabola2(time, -1);
+	var sun_green_color = parabola2(time, -.6);
+	var sun_blue_color = parabola2(time, -.45);
+	sun_red_color = Math.max(sun_red_color, 0.0);
+	sun_red_color = Math.min(sun_red_color, 1.0);
+	sun_green_color = Math.max(sun_green_color, 0.0);
+	sun_green_color = Math.min(sun_green_color, 1.0);
+	sun_blue_color = Math.max(sun_blue_color, 0.0);
+	sun_blue_color = Math.min(sun_blue_color, 1.0);
+	gl.uniform3f(fs_sunlinght_color, sun_red_color, sun_green_color, sun_blue_color);
+
+	// CRA
 
 	if (number_of_axis_displacements==0&&inerzia[0]==0&&inerzia[1]==0&&inerzia[2]==0) return;
 	else if (number_of_axis_displacements==2) {
 		//0.70710678118 is equal to 1/(2^0.5)
 		displacement = mult(0.70710678118, displacement);
-	} else if (number_of_axis_displacements==3) {
-		//0.57735026919 is equal to 1/(3^0.5)
-		displacement = mult(0.57735026919, displacement);
 	}
+
 	gravity = true;
 	displacement = mult(0.05, displacement); //slow down
 	displacement = add(inerzia, displacement);
-
 	displacement = mult(rotation_matrix, displacement);
 	if (physics_engine(camera_pos, displacement, 0)) {
 		inerzia[0] = 0;
@@ -657,6 +687,8 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	let shading_array = [];
 	this.instance_matrix_buffer;
 	let instance_matrix_array = [];
+	var normal_array = [];
+	var normal_buffer;
 
 	let polygons = chunk_size*chunk_size;
 
@@ -664,6 +696,11 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	this.vertex_array.push(vec4(1,0,0,1));
 	this.vertex_array.push(vec4(1,0,1,1));
 	this.vertex_array.push(vec4(0,0,1,1));
+
+	normal_array.push(vec3(0,1,0));
+	normal_array.push(vec3(0,1,0));
+	normal_array.push(vec3(0,1,0));
+	normal_array.push(vec3(0,1,0));
 
 	function add_vertical_cloud(from_cloud, to_cloud, x, z, which_side) {
 		if (from_cloud == to_cloud) return;
@@ -881,6 +918,11 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	gl.bindBuffer( gl.ARRAY_BUFFER, this.vertex_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(this.vertex_array), gl.STATIC_DRAW);
 
+	// NORMALS BUFFER
+	normal_buffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, normal_buffer );
+	gl.bufferData(gl.ARRAY_BUFFER, flatten(normal_array), gl.STATIC_DRAW);
+
 	// TEXTURE COORDINATE BUFFER
 	this.texture_coord_buffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, this.texture_coord_buffer );
@@ -916,6 +958,11 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.vertex_buffer );
 		gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
 		gl.enableVertexAttribArray( vPosition );
+
+		// NORMALS BUFFER
+		gl.bindBuffer( gl.ARRAY_BUFFER, normal_buffer );
+		gl.vertexAttribPointer( vs_normal, 3, gl.FLOAT, false, 0, 0 );
+		gl.enableVertexAttribArray( vs_normal );
 
 		// TEXTURE COORDINATE BUFFER
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.texture_coord_buffer);
@@ -963,6 +1010,7 @@ var vPosition;
 var vTexCoord;
 var vs_shading;
 var vs_matrix;
+var vs_normal;
 // main
 
 window.onload = function init() {
@@ -999,15 +1047,26 @@ window.onload = function init() {
 	vTexCoord = gl.getAttribLocation( program, "vTexCoord" );
 	vs_shading = gl.getAttribLocation( program, "vs_shading" );
 	vs_matrix = gl.getAttribLocation( program, "matrix" );
+	vs_normal = gl.getAttribLocation( program, "vs_normal" );
+	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
+
+	fs_sunlinght_direction = gl.getUniformLocation(program, "fs_sunlinght_direction");
+	fs_sunlinght_color = gl.getUniformLocation(program, "fs_sunlinght_color");
+	//gl.uniformMatrix4fv(fs_sunlinght_direction, false, flatten(vec3(1.0, 0.0, 0.0)));
+	gl.uniform3f(fs_sunlinght_direction, 1.0, 0.0, 0.0);
+	gl.uniform3f(fs_sunlinght_color, 1.0, 0.0, 1.0);
+
 
 	texture1 = gl.createTexture();
 	gl.bindTexture( gl.TEXTURE_2D, texture1 );
 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, texSize, texSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, image_texture);
 	gl.generateMipmap( gl.TEXTURE_2D );
-	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER,
-					  gl.NEAREST_MIPMAP_LINEAR );
+	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR );
 	gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+	//gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST );
+	//gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
 	gl.activeTexture( gl.TEXTURE0 );
 	gl.bindTexture( gl.TEXTURE_2D, texture1 );
@@ -1059,7 +1118,7 @@ window.onload = function init() {
 			key_pressed[2] = true;
 		} else if (e.key=="d"||e.key=="D") {
 			key_pressed[3] = true;
-		} else if (e.key=="Shift") {
+		} else if (e.key=="t"||e.key=="T") {
 			key_pressed[4] = true;
 		} else if (e.key==" ") {
 			key_pressed[5] = true;
@@ -1077,7 +1136,7 @@ window.onload = function init() {
 			key_pressed[2] = false;
 		} else if (e.key=="d"||e.key=="D") {
 			key_pressed[3] = false;
-		} else if (e.key=="Shift") {
+		} else if (e.key=="t"||e.key=="T") {
 			key_pressed[4] = false;
 		} else if (e.key==" ") {
 			key_pressed[5] = false;
