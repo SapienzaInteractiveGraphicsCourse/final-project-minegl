@@ -13,8 +13,6 @@ var instanceMatrix;
 var fs_sunlinght_direction;
 var fs_sunlinght_color;
 
-var cavallo;
-
 // Navigate
 var mouse_x;
 var mouse_y;
@@ -23,16 +21,10 @@ var mouse_beta;
 var mouse_pressing = false;
 
 var camera_pos = vec3(75,70,75);
-//var camera_pos = vec3(0,10,0);
 var camera_lookat = vec3(0,0,0);
-
-var camera_alfa = 0; //Math.PI/2;
+var camera_alfa = 0;
 var camera_beta = -1.0;
-var time = Math.PI/4;
-//var camera_alfa = 2.438;
-//var camera_beta = -1.0;
-//var camera_alfa = radians(180);
-//var camera_beta = 0;
+var time = Math.PI/4; //check
 
 var key_pressed = new Array(7);
 for (var i = 0; i < 4; i++) {
@@ -42,7 +34,7 @@ for (var i = 0; i < 4; i++) {
 // Controllo prestazioni
 var last_time = -1;
 
-// Varie
+// Misc
 //var textures = [];
 
 function scale4(a, b, c) {
@@ -69,18 +61,6 @@ var textures = {
 	dirt: vec2(1/16+(3*bordo/256),15/16-(bordo/256)),
 	water: vec2(6/16+13*bordo/256,15/16-bordo/256)
 };
-
-/*
-creature_center_y = {human: 1.8, horse: 0, spider: 0};
-var textures = {
-	"grass": vec2(0,0),
-	"dirty grass": vec2(0,0),
-	"snow": vec2(0,0),
-	"dirty snow": vec2(0,0),
-	"dirt": vec2(0,0),
-	"water": vec2(0,0)
-};*/
-
 
 for ( var i = 0; i < texSize; i++ ) {
 	for ( var j = 0; j <texSize; j++ ) {
@@ -1221,10 +1201,7 @@ function quad(a, b, c, d) {
 	//texCoordsArray.push(texCoord[2]);
 }
 
-//var cavallo_oggetto;
-
 function entity(starting_x, starting_y, starting_z) {
-	//this.position = vec3(75.5, 60, 75.5);
 	this.position = vec3(starting_x, starting_y, starting_z);
 	this.direction = vec3(0,0,0);
 	this.inerzia = vec3(0,0,0);
@@ -1545,17 +1522,9 @@ window.onload = function init() {
 			mouse_beta = 1.56;
 			mouse_y = e.offsetY;
 		}
-		/*
-		camera_alfa = camera_alfa % (2 * Math.PI);
-		camera_alfa = (2 * Math.PI) + camera_alfa;
-		camera_alfa = camera_alfa % (2 * Math.PI);
-		*/
 		update_lookAt();
 		compute_camera_matrix();
 	};
-
-	cavallo = new createHorse(75, 50, 75);
-
 
 	update_lookAt();
 	compute_camera_matrix();
@@ -1601,16 +1570,8 @@ var renderS = function() {
 	identita();
 
 	for (var i = 0; i < entities.length; i++) {
-		//entities[i].eat_animation();
 		entities[i].render();
 	}
-
-	//cavallo_oggetto.render();
-
-
-	//cavallo.eat_animation();
-	//cavallo.render();
-
 
 	modelViewMatrix = mat4();
 	gl.uniformMatrix4fv(gl.getUniformLocation( program, "modelViewMatrix"), false, flatten(modelViewMatrix) );
