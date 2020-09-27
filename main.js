@@ -28,7 +28,7 @@ var camera_lookat = vec3(0,0,0);
 
 var camera_alfa = 0; //Math.PI/2;
 var camera_beta = -1.0;
-var time = 0;
+var time = Math.PI/4;
 //var camera_alfa = 2.438;
 //var camera_beta = -1.0;
 //var camera_alfa = radians(180);
@@ -84,9 +84,9 @@ var textures = {
 
 for ( var i = 0; i < texSize; i++ ) {
 	for ( var j = 0; j <texSize; j++ ) {
-		image_texture[4*i*texSize+4*j] = 255;
-		image_texture[4*i*texSize+4*j+1] = 0;
-		image_texture[4*i*texSize+4*j+2] = 255;
+		image_texture[4*i*texSize+4*j] = 130;
+		image_texture[4*i*texSize+4*j+1] = 130;
+		image_texture[4*i*texSize+4*j+2] = 130;
 		image_texture[4*i*texSize+4*j+3] = 255;
 	}
 }
