@@ -7,66 +7,47 @@
 <script id="vertex-shader" type="x-shader/x-vertex">
 #version 300 es
 
-in  vec4 vPosition;
-in  vec2 vTexCoord;
+in vec4 vPosition;
+in vec2 vs_texture_coord;
 in float vs_shading;
 in vec3 vs_normal;
+in mat4 vs_model_matrix;
 
+out vec3 fs_position;
 out vec3 fs_normal;
 out float fs_shading;
-out vec2 fTexCoord;
+out vec2 fs_texture_coord;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 
-in mat4 matrix;
-
 void main()
 {
+	mat4 nmm = modelViewMatrix * vs_model_matrix;
+
 	fs_shading = vs_shading;
-	fs_normal = mat3(matrix) * vs_normal;
-	fTexCoord = vTexCoord;
+	//fs_normal = mat3(vs_model_matrix) * vs_normal;
+	fs_normal = mat3(nmm) * vs_normal;
+	fs_texture_coord = vs_texture_coord;
 
 	switch (gl_VertexID) {
 	case 1:
-	    fTexCoord.y += 0.0625;
+	    fs_texture_coord.y += 0.0625;
 	    break;
 	case 2:
-		fTexCoord.x += 0.0625;
-		fTexCoord.y += 0.0625;
+		fs_texture_coord.x += 0.0625;
+		fs_texture_coord.y += 0.0625;
 		break;
 	case 3:
-		fTexCoord.x += 0.0625;
+		fs_texture_coord.x += 0.0625;
 		break;
-	}/*
-	switch (gl_VertexID) {
-	case 1:
-	    fTexCoord.y += 0.03;
-	    break;
-	case 2:
-		fTexCoord.x += 0.03;
-		fTexCoord.y += 0.03;
-		break;
-	case 3:
-		fTexCoord.x += 0.03;
-		break;
-	}*/
-	/*
-	switch (gl_VertexID) {
-	case 1:
-	    fTexCoord.y += 1.0;
-	    break;
-	case 2:
-		fTexCoord.x += 1.0;
-		fTexCoord.y += 1.0;
-		break;
-	case 3:
-		fTexCoord.x += 1.0;
-		break;
-	}*/
+	}
 
-	//gl_Position = projectionMatrix * modelViewMatrix * vPosition;
-	gl_Position = projectionMatrix * matrix * vPosition;
+	//fs_position = vec3(projectionMatrix * matrix * vPosition);
+	//fs_position = vec3(vs_model_matrix * vPosition);
+	fs_position = vec3(nmm * vPosition);
+
+	gl_Position = projectionMatrix *  vec4(fs_position, 1.0);
 }
 </script>
 
@@ -76,8 +57,9 @@ void main()
 precision mediump float;
 
 in vec3 fs_normal;
-in  vec2 fTexCoord;
+in vec2 fs_texture_coord;
 in float fs_shading;
+in vec3 fs_position;
 
 out vec4 fragColor;
 
@@ -85,17 +67,23 @@ uniform sampler2D Tex0;
 uniform vec3 fs_sunlinght_direction;
 uniform vec3 fs_sunlinght_color;
 
+uniform vec3 fs_moonlinght_direction;
+uniform vec3 fs_moonlinght_color;
+uniform vec3 fs_camera_pos;
+
 void main()
 {
-	vec3 fs_moonlinght_direction = -1.0 * fs_sunlinght_direction;
+	//vec3 fs_moonlinght_direction = -1.0 * fs_sunlinght_direction;
 	//vec3 fs_moonlinght_color = vec3(.1, .2, .3) * (1.0 - fs_sunlinght_color[0]);
-	vec3 fs_moonlinght_color = vec3(.105882353, .125490196, .308627451) * (1.0 - fs_sunlinght_color[0]);
+	//vec3 fs_moonlinght_color = vec3(.105882353, .125490196, .308627451) * (1.0 - fs_sunlinght_color[0]);
 	//vec3 fs_moonlinght_color = vec3(0.101960784,0.109803922,0.262745098) * (1.0 - fs_sunlinght_color[0]);
 
+	// AMBIENT
 	float ambient_value = 0.2;
 	//vec3 ambient = ambient_value*fs_sunlinght_color;
 	vec3 ambient = ambient_value*(fs_sunlinght_color + fs_moonlinght_color);
 
+	// DIFFUSE
 	float diffuse_sun_value = max(dot(fs_normal, fs_sunlinght_direction)+0.1, 0.0);
 	float diffuse_moon_value = max(dot(fs_normal, fs_moonlinght_direction)+0.1, 0.0);
 	diffuse_sun_value = min(1.0, diffuse_sun_value);
@@ -103,13 +91,19 @@ void main()
 	//vec3 diffuse = diffuse_value*fs_sunlinght_color;
 	vec3 diffuse = diffuse_moon_value*fs_moonlinght_color + diffuse_sun_value*fs_sunlinght_color;
 
+	// REFLECTION
+	vec3 view_direction = normalize(fs_camera_pos-fs_position);
+	vec3 sun_reflection = reflect(-fs_sunlinght_direction, fs_normal);
+	float reflection_value = pow(max(dot(sun_reflection, view_direction), 0.0), 64.0);
+	vec3 reflection = reflection_value * fs_sunlinght_color * fs_shading;
+
 	//combine
-	vec3 tmp = vec3(texture(Tex0, fTexCoord));
-	tmp = tmp * .87 * (ambient + diffuse);
+	vec3 tmp = vec3(texture(Tex0, fs_texture_coord));
+	tmp = tmp * .87 * (ambient + diffuse + reflection);// + reflection);
 	//tmp = tmp * fs_shading;
 
 	fragColor = vec4(tmp, 1.0);
-	//fragColor = texture(Tex0, fTexCoord)*fs_shading;
+	//fragColor = texture(Tex0, fs_texture_coord)*fs_shading;
 	//fragColor.w = 1.0;
 }
 </script>
@@ -117,6 +111,8 @@ void main()
 <script type="text/javascript" src="./lib/InitShaders.js"></script>
 <script type="text/javascript" src="./lib/MVnew.js"></script>
 <script type="text/javascript" src="./lib/simplexNoise.js"></script>
+<script type="text/javascript" src="horse.js"></script>
+<script type="text/javascript" src="spider.js"></script>
 <script type="text/javascript" src="main.js"></script>
 
 <body>
