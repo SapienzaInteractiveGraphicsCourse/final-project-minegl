@@ -59,7 +59,8 @@ var textures = {
 	snow: vec2(4/16+9*bordo/256,15/16-bordo/256),
 	dirty_snow: vec2(5/16+11*bordo/256,15/16-bordo/256),
 	dirt: vec2(1/16+(3*bordo/256),15/16-(bordo/256)),
-	water: vec2(6/16+13*bordo/256,15/16-bordo/256)
+	water: vec2(6/16+13*bordo/256,15/16-bordo/256),
+	skin: vec2(7/16+15*bordo/256,15/16-bordo/256)
 };
 
 for ( var i = 0; i < texSize; i++ ) {
@@ -188,6 +189,12 @@ for ( var i = 0; i < 1; i++ ) {
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)] = Math.abs(red_variation);
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+1] = 18 + green_variation;
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+2] = 179 + blue_variation;
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+3] = 255;
+				} else if (i==0&&j==7) {
+					// cavallo e ragno
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)] = 80+Math.abs(red_variation);
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+1] = 80+Math.abs(green_variation);
+					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+2] = 80+Math.abs(blue_variation);
 					image_texture[4*(temp_x+x)*texSize+4*(temp_y+y)+3] = 255;
 				}
 			}
@@ -785,8 +792,8 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 
 	this.texture_coord_buffer;
 	var texture_coord_array = [];
-	var shading_buffer;
-	var shading_array = [];
+	var reflection_buffer;
+	var reflection_array = [];
 	this.instance_matrix_buffer;
 	let instance_matrix_array = [];
 
@@ -802,7 +809,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			if (from_cloud) {
 				instance_matrix = mult( rotate(-90, 0, 0, 1), instance_matrix );
 				instance_matrix_array.push( mult(translate(x,80,z), instance_matrix) );
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 				texture_coord_array.push(textures.cloud);
 				polygons++;
 			} else {
@@ -810,7 +817,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(rotate(90, 0, 0, 1), instance_matrix);
 				instance_matrix = mult(translate(x,80,z+(chunk_size/cloud_size)), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 				texture_coord_array.push(textures.cloud);
 				polygons++;
 			}
@@ -821,7 +828,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(rotate(90, 1, 0, 0), instance_matrix);
 				instance_matrix = mult(translate(x+(chunk_size/cloud_size),80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 				texture_coord_array.push(textures.cloud);
 				polygons++;
 			} else {
@@ -829,7 +836,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 				instance_matrix = mult(rotate(-90, 1, 0, 0), instance_matrix);
 				instance_matrix = mult(translate(x,80,z), instance_matrix);
 				instance_matrix_array.push(instance_matrix);
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 				texture_coord_array.push(textures.cloud);
 				polygons++;
 			}
@@ -853,7 +860,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			if (from_y>to_y) {
 				for (let y = to_y; y < from_y; y++) {
 					instance_matrix_array.push(mult(translate(x,y-1,z), rotate(-90, 0, 0, 1)));
-					shading_array.push(0.0);
+					reflection_array.push(0.0);
 					if (y==from_y-1) {
 						if (y>snow_level) {
 							texture_coord_array.push(textures.dirty_snow);
@@ -871,7 +878,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					instance_matrix = mult(rotate(90, 0, 0, 1), instance_matrix);
 					instance_matrix = mult(translate(x,y-1,z+1), instance_matrix);
 					instance_matrix_array.push(instance_matrix);
-					shading_array.push(0.0);
+					reflection_array.push(0.0);
 					if (y==to_y-1) {
 						if (y>snow_level) {
 							texture_coord_array.push(textures.dirty_snow);
@@ -892,7 +899,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					instance_matrix = mult(rotate(90, 1, 0, 0), instance_matrix);
 					instance_matrix = mult(translate(x+1,y-1,z), instance_matrix);
 					instance_matrix_array.push(instance_matrix);
-					shading_array.push(0.0);
+					reflection_array.push(0.0);
 					if (y==from_y-1) {
 						if (y>snow_level) {
 							texture_coord_array.push(textures.dirty_snow);
@@ -910,7 +917,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 					instance_matrix = mult(rotate(-90, 1, 0, 0), instance_matrix);
 					instance_matrix = mult(translate(x,y-1,z), instance_matrix);
 					instance_matrix_array.push(instance_matrix);
-					shading_array.push(0.0);
+					reflection_array.push(0.0);
 					if (y==to_y-1) {
 						if (y>snow_level) {
 							texture_coord_array.push(textures.dirty_snow);
@@ -942,14 +949,14 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			this.map[x][z] =  Math.floor(noise(translate_x/noise_reduction, translate_z/noise_reduction)*chunk_peak);
 			if (this.map[x][z] > snow_level) {
 				texture_coord_array.push(textures.snow);
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 			} else if (this.map[x][z] <= water_level) {
 				this.map[x][z] = water_level;
 				texture_coord_array.push(textures.water);
-				shading_array.push(3.5);
+				reflection_array.push(3.5);
 			} else {
 				texture_coord_array.push(textures.grass);
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 			}
 			instance_matrix_array.push(translate(translate_x,this.map[x][z],translate_z));
 
@@ -984,7 +991,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 			if (this.cloud_map[x][z]) {
 				texture_coord_array.push(textures.cloud);
 				instance_matrix_array.push( mult(translate(translate_x,80,translate_z), instance_matrix) );
-				shading_array.push(0.0);
+				reflection_array.push(0.0);
 				polygons++;
 			}
 
@@ -1012,12 +1019,12 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(texture_coord_array), gl.STATIC_DRAW);
 
 	// SHADING BUFFER
-	var floats = new Float32Array( shading_array.length  );
-	for (var i = 0; i < shading_array.length; i++) {
-		floats[i] = shading_array[i];
+	var floats = new Float32Array( reflection_array.length  );
+	for (var i = 0; i < reflection_array.length; i++) {
+		floats[i] = reflection_array[i];
 	}
-	shading_buffer = gl.createBuffer();
-	gl.bindBuffer( gl.ARRAY_BUFFER, shading_buffer );
+	reflection_buffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, reflection_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, floats, gl.STATIC_DRAW);
 
 	// INSTANCE MATRICES BUFFER
@@ -1031,30 +1038,19 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 		}
 	}
 	gl.bufferData(gl.ARRAY_BUFFER, superfloat, gl.STATIC_DRAW);
-	/*
-	gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.instance_matrix_array, 0, this.instance_matrix_array.length * 16 * 4); // questo a quanto pare gli passa effettivamente i dati
-	?? gl.bufferSubData(gl.ARRAY_BUFFER, 0, superfloat); ??
-	void gl.bufferData(target, ArrayBufferView srcData, usage, srcOffset, length);
-	void gl.bufferSubData(target, dstByteOffset, ArrayBufferView srcData, srcOffset, length);
-	void gl.bufferData(target, ArrayBufferView srcData, usage);
-	void gl.bufferSubData(target, offset, ArrayBufferView srcData);
-	gl.bufferSubData(gl.ARRAY_BUFFER, 0, superfloat);
-
-	*/
 
 	this.render = function() {
 		// TEXTURE COORDINATE BUFFER
 		gl.bindBuffer( gl.ARRAY_BUFFER, this.texture_coord_buffer);
 		gl.vertexAttribPointer( vs_texture_coord, 2, gl.FLOAT, false, 8, 0 );
-		//gl.vertexAttribPointer( vs_texture_coord, 2, gl.FLOAT, false, 0, 0 );
 		gl.enableVertexAttribArray( vs_texture_coord );
 		gl.vertexAttribDivisor(vs_texture_coord, 1);
 
 		// SHADING BUFFER
-		gl.bindBuffer( gl.ARRAY_BUFFER, shading_buffer);
-		gl.vertexAttribPointer( vs_shading, 1, gl.FLOAT, false, 4, 0 );
-		gl.enableVertexAttribArray( vs_shading );
-		gl.vertexAttribDivisor(vs_shading, 1);
+		gl.bindBuffer( gl.ARRAY_BUFFER, reflection_buffer);
+		gl.vertexAttribPointer( vs_reflection, 1, gl.FLOAT, false, 4, 0 );
+		gl.enableVertexAttribArray( vs_reflection );
+		gl.vertexAttribDivisor(vs_reflection, 1);
 
 		// INSTANCE MATRICES BUFFER
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.instance_matrix_buffer);
@@ -1087,7 +1083,7 @@ function chunkT(offsetX, offsetZ, left_chunk, top_chunk, bottom_chunk, right_chu
 var chunks = [];
 var vPosition;
 var vs_texture_coord;
-var vs_shading;
+var vs_reflection;
 var vs_model_matrix;
 var vs_normal;
 var fs_moonlinght_direction;
@@ -1103,17 +1099,6 @@ var entity_normal_buffer;
 var terrain_vertex_buffer;
 var terrain_normal_buffer;
 
-/*
-var vertices = [
-	vec4( 0.0, -1.0,  1.0, 1.0 ),
-	vec4( 0.0,  0.0,  1.0, 1.0 ),
-	vec4( 1.0,  0.0,  1.0, 1.0 ),
-	vec4( 1.0, -1.0,  1.0, 1.0 ),
-	vec4( 0.0, -1.0, 0.0, 1.0 ),
-	vec4( 0.0,  0.0, 0.0, 1.0 ),
-	vec4( 1.0,  0.0, 0.0, 1.0 ),
-	vec4( 1.0, -1.0, 0.0, 1.0 )
-];*/
 
 var vertices = [
 	vec4( -0.5, -0.5,  0.5, 1.0 ),
@@ -1133,72 +1118,67 @@ var texCoord = [
 	vec2(1, 0)
 ];
 
-var cavalo_texture = [];
-var cavalo_shading = [];
-var cavalo_texture_buffer;
-var cavalo_shading_buffer;
-var cavalo_matrice_buffer;
+var entity_texture = [];
+var entity_reflection = [];
+var entity_texture_buffer;
+var entity_reflection_buffer;
 
 function cube()
 {
 	quad( 6, 5, 1, 2 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(0,1,0));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 
 	quad( 1, 0, 3, 2 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(0,0,1));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 
 	quad( 2, 3, 7, 6 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(1,0,0));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 
 	quad( 3, 0, 4, 7 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(0,-1,0));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 
 	quad( 4, 5, 6, 7 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(0,0,-1));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 
 	quad( 5, 4, 0, 1 );
 	for (var i = 0; i < 4; i++)  {
 		entity_normal_array.push(vec3(-1,0,0));
-		cavalo_texture.push(textures.water);
-		cavalo_shading.push(3.5);
+		entity_texture.push(textures.skin);
+		entity_reflection.push(0);
 	}
 
 }
 
 function quad(a, b, c, d) {
 	entity_vertex_array.push(vertices[b]);
-	//texCoordsArray.push(texCoord[1]);
 	entity_vertex_array.push(vertices[a]);
-	//texCoordsArray.push(texCoord[0]);
 	entity_vertex_array.push(vertices[d]);
-	//texCoordsArray.push(texCoord[3]);
 	entity_vertex_array.push(vertices[c]);
-	//texCoordsArray.push(texCoord[2]);
 }
 
 function entity(starting_x, starting_y, starting_z) {
@@ -1217,18 +1197,13 @@ function entity(starting_x, starting_y, starting_z) {
 
 	this.render = function () {
 		var matrice = translate(this.position[0], this.position[1]-0.5, this.position[2]);
-		gl.bindBuffer( gl.ARRAY_BUFFER, cavalo_texture_buffer );
+		gl.bindBuffer( gl.ARRAY_BUFFER, entity_texture_buffer );
 		gl.vertexAttribPointer( vs_texture_coord, 2, gl.FLOAT, false, 0, 0 );
 		gl.enableVertexAttribArray( vs_texture_coord );
 
-		gl.bindBuffer( gl.ARRAY_BUFFER, cavalo_shading_buffer);
-		gl.vertexAttribPointer( vs_shading, 1, gl.FLOAT, false, 0, 0 );
-		gl.enableVertexAttribArray( vs_shading );
-
-
-		gl.bindBuffer(gl.ARRAY_BUFFER, cavalo_matrice_buffer);
-		gl.bufferSubData(gl.ARRAY_BUFFER, 0, flatten(matrice));
-
+		gl.bindBuffer( gl.ARRAY_BUFFER, entity_reflection_buffer);
+		gl.vertexAttribPointer( vs_reflection, 1, gl.FLOAT, false, 0, 0 );
+		gl.enableVertexAttribArray( vs_reflection );
 
 		// tutto il blocco seguente serve al posto del normale gl.vertexAttribPointer()
 
@@ -1321,22 +1296,18 @@ window.onload = function init() {
 
 	cube();
 
-	cavalo_texture_buffer = gl.createBuffer();
-	gl.bindBuffer( gl.ARRAY_BUFFER, cavalo_texture_buffer );
-	gl.bufferData(gl.ARRAY_BUFFER, flatten(cavalo_texture), gl.STATIC_DRAW);
+	entity_texture_buffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, entity_texture_buffer );
+	gl.bufferData(gl.ARRAY_BUFFER, flatten(entity_texture), gl.STATIC_DRAW);
 	//-
-	var floats = new Float32Array( cavalo_shading.length  );
-	for (var i = 0; i < cavalo_shading.length; i++) {
-		floats[i] = cavalo_shading[i];
+	var floats = new Float32Array( entity_reflection.length  );
+	for (var i = 0; i < entity_reflection.length; i++) {
+		floats[i] = entity_reflection[i];
 	}
-	cavalo_shading_buffer = gl.createBuffer();
-	gl.bindBuffer( gl.ARRAY_BUFFER, cavalo_shading_buffer );
+	entity_reflection_buffer = gl.createBuffer();
+	gl.bindBuffer( gl.ARRAY_BUFFER, entity_reflection_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, floats, gl.STATIC_DRAW);
 	//-
-	cavalo_matrice_buffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, cavalo_matrice_buffer);
-	gl.bufferData(gl.ARRAY_BUFFER, flatten(mat4()), gl.STATIC_DRAW);
-
 	identita_buffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, identita_buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(mat4()), gl.STATIC_DRAW);
@@ -1344,7 +1315,6 @@ window.onload = function init() {
 
 
 	// entities
-	//entities.push(new entity(75.5, -1, 75.5));
 	entities.push(new createHorse(71.5, -1, 75.5));
 	entities.push(new createHorse(77.5, -1, 77.5));
 	entities.push(new createHorse(60.5, -1, 75.5));
@@ -1358,7 +1328,7 @@ window.onload = function init() {
 	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix")
 	vPosition = gl.getAttribLocation( program, "vPosition" );
 	vs_texture_coord = gl.getAttribLocation( program, "vs_texture_coord" );
-	vs_shading = gl.getAttribLocation( program, "vs_shading" );
+	vs_reflection = gl.getAttribLocation( program, "vs_reflection" );
 	vs_model_matrix = gl.getAttribLocation( program, "vs_model_matrix" );
 	vs_normal = gl.getAttribLocation( program, "vs_normal" );
 	projectionMatrixLoc = gl.getUniformLocation(program, "projectionMatrix");
@@ -1383,30 +1353,21 @@ window.onload = function init() {
 	terrain_vertex_buffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, terrain_vertex_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(terrain_vertex_array), gl.STATIC_DRAW);
-	//gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-	//gl.enableVertexAttribArray( vPosition );
 
 	// TERRAIN NORMALS
 	terrain_normal_buffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, terrain_normal_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(terrain_normal_array), gl.STATIC_DRAW);
-	//gl.vertexAttribPointer( vs_normal, 3, gl.FLOAT, false, 0, 0 );
-	//gl.enableVertexAttribArray( vs_normal );
 
 	// ENTITY VERTICES
 	entity_vertex_buffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, entity_vertex_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(entity_vertex_array), gl.STATIC_DRAW);
-	//gl.vertexAttribPointer( vPosition, 4, gl.FLOAT, false, 0, 0 );
-	//gl.enableVertexAttribArray( vPosition );
 
 	// ENTITY NORMALS
 	entity_normal_buffer = gl.createBuffer();
 	gl.bindBuffer( gl.ARRAY_BUFFER, entity_normal_buffer );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(entity_normal_array), gl.STATIC_DRAW);
-	//gl.vertexAttribPointer( vs_normal, 3, gl.FLOAT, false, 0, 0 );
-	//gl.enableVertexAttribArray( vs_normal );
-
 
 	// TEXTURE
 	texture1 = gl.createTexture();
@@ -1566,6 +1527,15 @@ var renderS = function() {
 	gl.vertexAttribPointer( vs_normal, 3, gl.FLOAT, false, 0, 0 );
 	gl.enableVertexAttribArray( vs_normal );
 
+	// ENTITY REFLECTION
+	gl.bindBuffer( gl.ARRAY_BUFFER, entity_reflection_buffer);
+	gl.vertexAttribPointer( vs_reflection, 1, gl.FLOAT, false, 0, 0 );
+	gl.enableVertexAttribArray( vs_reflection );
+
+	// ENTITY TEXTURE
+	gl.bindBuffer( gl.ARRAY_BUFFER, entity_texture_buffer );
+	gl.vertexAttribPointer( vs_texture_coord, 2, gl.FLOAT, false, 0, 0 );
+	gl.enableVertexAttribArray( vs_texture_coord );
 
 	identita();
 

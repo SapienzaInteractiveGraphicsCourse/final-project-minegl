@@ -8,14 +8,14 @@
 #version 300 es
 
 in vec4 vPosition;
-in vec2 vs_texture_coord;
-in float vs_shading;
 in vec3 vs_normal;
+in vec2 vs_texture_coord;
 in mat4 vs_model_matrix;
+in float vs_reflection;
 
 out vec3 fs_position;
 out vec3 fs_normal;
-out float fs_shading;
+out float fs_reflection;
 out vec2 fs_texture_coord;
 
 uniform mat4 modelViewMatrix;
@@ -25,8 +25,7 @@ void main()
 {
 	mat4 nmm = modelViewMatrix * vs_model_matrix;
 
-	fs_shading = vs_shading;
-	//fs_normal = mat3(vs_model_matrix) * vs_normal;
+	fs_reflection = vs_reflection;
 	fs_normal = mat3(nmm) * vs_normal;
 	fs_texture_coord = vs_texture_coord;
 
@@ -43,10 +42,7 @@ void main()
 		break;
 	}
 
-	//fs_position = vec3(projectionMatrix * matrix * vPosition);
-	//fs_position = vec3(vs_model_matrix * vPosition);
 	fs_position = vec3(nmm * vPosition);
-
 	gl_Position = projectionMatrix *  vec4(fs_position, 1.0);
 }
 </script>
@@ -58,7 +54,7 @@ precision mediump float;
 
 in vec3 fs_normal;
 in vec2 fs_texture_coord;
-in float fs_shading;
+in float fs_reflection;
 in vec3 fs_position;
 
 out vec4 fragColor;
@@ -73,14 +69,8 @@ uniform vec3 fs_camera_pos;
 
 void main()
 {
-	//vec3 fs_moonlinght_direction = -1.0 * fs_sunlinght_direction;
-	//vec3 fs_moonlinght_color = vec3(.1, .2, .3) * (1.0 - fs_sunlinght_color[0]);
-	//vec3 fs_moonlinght_color = vec3(.105882353, .125490196, .308627451) * (1.0 - fs_sunlinght_color[0]);
-	//vec3 fs_moonlinght_color = vec3(0.101960784,0.109803922,0.262745098) * (1.0 - fs_sunlinght_color[0]);
-
 	// AMBIENT
 	float ambient_value = 0.2;
-	//vec3 ambient = ambient_value*fs_sunlinght_color;
 	vec3 ambient = ambient_value*(fs_sunlinght_color + fs_moonlinght_color);
 
 	// DIFFUSE
@@ -88,22 +78,21 @@ void main()
 	float diffuse_moon_value = max(dot(fs_normal, fs_moonlinght_direction)+0.1, 0.0);
 	diffuse_sun_value = min(1.0, diffuse_sun_value);
 	diffuse_moon_value = min(1.0, diffuse_moon_value);
-	//vec3 diffuse = diffuse_value*fs_sunlinght_color;
 	vec3 diffuse = diffuse_moon_value*fs_moonlinght_color + diffuse_sun_value*fs_sunlinght_color;
 
 	// REFLECTION
 	vec3 view_direction = normalize(fs_camera_pos-fs_position);
 	vec3 sun_reflection = reflect(-fs_sunlinght_direction, fs_normal);
 	float reflection_value = pow(max(dot(sun_reflection, view_direction), 0.0), 64.0);
-	vec3 reflection = reflection_value * fs_sunlinght_color * fs_shading;
+	vec3 reflection = reflection_value * fs_sunlinght_color * fs_reflection;
 
 	//combine
 	vec3 tmp = vec3(texture(Tex0, fs_texture_coord));
 	tmp = tmp * .87 * (ambient + diffuse + reflection);// + reflection);
-	//tmp = tmp * fs_shading;
+	//tmp = tmp * fs_reflection;
 
 	fragColor = vec4(tmp, 1.0);
-	//fragColor = texture(Tex0, fs_texture_coord)*fs_shading;
+	//fragColor = texture(Tex0, fs_texture_coord)*fs_reflection;
 	//fragColor.w = 1.0;
 }
 </script>
